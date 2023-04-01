@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.messengerProject.SpringMessenger.Models.Message;
@@ -13,6 +12,8 @@ import com.messengerProject.SpringMessenger.Models.User;
 @RestController
 public class MessagingController {
 
+	int messageCount;
+
 	ArrayList<User> allUsers;
 	User JackHarris;
 	User testUser;
@@ -20,15 +21,22 @@ public class MessagingController {
 
 	public MessagingController() {
 
+		messageCount = 0;
+
 		allUsers = new ArrayList<User>();
 
+		// Test data
 		JackHarris = new User("JackHarris", "AdminPassword", true);
 		testUser = new User("Jack123", "password1", false);
 		testUser2 = new User("Jack987", "password2", false);
 
+		// For test consistency
+		JackHarris.setUniqueKey(0.5461992905539923);
+
 		allUsers.add(JackHarris);
 		allUsers.add(testUser);
 		allUsers.add(testUser2);
+
 	}
 
 	@GetMapping("/")
@@ -38,7 +46,7 @@ public class MessagingController {
 	}
 
 	@GetMapping("/returnAllUsernames")
-	ArrayList<String> returnAllUsernames() {
+	public ArrayList<String> returnAllUsernames() {
 
 		ArrayList<String> output = new ArrayList<String>();
 
@@ -48,11 +56,24 @@ public class MessagingController {
 		return output;
 	}
 
+	@GetMapping("/findByUsername/{username}")
+	public User findByUsername(@PathVariable String username) {
+
+		boolean confirmExists = checkUserExists(username);
+
+		if (confirmExists) {
+			for (User user : allUsers) {
+				if (user.getUsername().equals(username)) {
+					return user;
+				}
+			}
+		}
+		return null;
+	}
+
 	@GetMapping("/returnAllUsers")
-	ArrayList<User> returnAllUsers() {
-
+	public ArrayList<User> returnAllUsers() {
 		ArrayList<User> output = new ArrayList<User>();
-
 		for (User user : allUsers) {
 			output.add(user);
 		}
@@ -60,12 +81,12 @@ public class MessagingController {
 	}
 
 	@GetMapping("/checkUserExists/{targetUsername}")
-	boolean checkUserExists(@PathVariable String targetUsername) {
+	public boolean checkUserExists(@PathVariable String targetUsername) {
 
 		ArrayList<String> allUsernames = returnAllUsernames();
 
 		for (String returnedUsername : allUsernames) {
-			if (returnedUsername.equals(targetUsername)) {
+			if (returnedUsername.toLowerCase().equals(targetUsername.toLowerCase())) {
 				return true;
 			}
 		}
@@ -73,7 +94,7 @@ public class MessagingController {
 	}
 
 	@GetMapping("/createUser/{username}/{password}")
-	String createUser(@PathVariable String username, @PathVariable String password) {
+	public String createUser(@PathVariable String username, @PathVariable String password) {
 
 		boolean nameTaken = checkUserExists(username);
 		ArrayList<User> allReturnedUsers = returnAllUsers();
@@ -81,19 +102,18 @@ public class MessagingController {
 		if (nameTaken == false) {
 			User newUser = new User(username, password, false);
 
-			for (User existantUsername : allReturnedUsers) {
-				if (existantUsername.getUsername().equals(newUser.getUsername())) {
-					return "Username taken";
-				}
-				allUsers.add(newUser);
-				return "New user created: " + username + " " + password;
-			}
+			allUsers.add(newUser);
+			return "New user created: " + username + " " + password;
 		}
 		return "Username taken, user not added: " + username;
 	}
 
 	@GetMapping("/removeUser/{username}")
-	String removeUser(@PathVariable String username) {
+	public String removeUser(@PathVariable String username) {
+
+		if (username.equals("JackHarris")) {
+			return "Cannot delete admin accounts";
+		}
 
 		boolean nameInUse = checkUserExists(username);
 
@@ -102,7 +122,7 @@ public class MessagingController {
 			ArrayList<User> allReturnedUsers = returnAllUsers();
 
 			for (User existantUser : allReturnedUsers) {
-				if (existantUser.getUsername().equals(username) && !existantUser.getUsername().equals("JackHarris")) {
+				if (existantUser.getUsername().equals(username)) {
 					allUsers.remove(existantUser);
 					return "User removed";
 				}
@@ -114,40 +134,55 @@ public class MessagingController {
 		// Currently adds to allUsers
 	}
 
-
 	// TODO Make this a proper @PostMapping with title and body not visible in URL
 	@GetMapping("/sendMessage/{senderUsername}/{recipientUsername}/{title}/{body}")
-	String sendMessage(@PathVariable String senderUsername, @PathVariable String recipientUsername,
+	public String sendMessage(@PathVariable String senderUsername, @PathVariable String recipientUsername,
 			@PathVariable String title, @PathVariable String body) {
 		System.out.println("MESSAGE SEND ATTEMPT");
-		Message messageToSend = new Message(allUsers, senderUsername, recipientUsername, title, body);
+
+		if (senderUsername.equals(recipientUsername)) {
+			return "Cannot send message to self";
+		}
+
+		boolean senderExists = checkUserExists(senderUsername);
+		boolean recipientExists = checkUserExists(recipientUsername);
+
+		if (senderExists == false) {
+			return "No such sender exists";
+		}
+		if (recipientExists == false) {
+			return "No such recipient exists";
+		}
+
+		Message messageToSend = new Message(allUsers, senderUsername, recipientUsername, title, body, messageCount);
+		messageCount++;
 
 		boolean confirmRecipientExists = checkUserExists(recipientUsername);
-
 		if (confirmRecipientExists) {
 
-			for (User user : allUsers) {
+			for (User sender : allUsers) {
 
-				if (user.getUsername().equals(senderUsername)) {
-					user.getSentMessages().add(messageToSend);
+				if (sender.getUsername().equals(senderUsername)) {
+					sender.getSentMessages().add(messageToSend);
 				}
+			}
 
-				if (user.getUsername().equals(recipientUsername)) {
-					user.getReceivedMessages().add(messageToSend);
-					return "Message sent!";
+			for (User recipient : allUsers) {
+				if (recipient.getUsername().equals(recipientUsername)) {
+					recipient.getReceivedMessages().add(messageToSend);
 				}
 			}
 		}
-		return "Failed to send message";
+		return "Message sent!";
+//		return "Failed to send message";
 
-		// Adds the message to the recipients ArrayList<Message> of received messages
 	}
 
 	@GetMapping("/checkMessagesReceived/{username}")
-	ArrayList<Message> checkMessagesReceived(@PathVariable String username) {
+	public ArrayList<Message> checkMessagesReceived(@PathVariable String username) {
 		System.out.println("Retreiving RECEIVED messages...");
 		ArrayList<Message> messageList = new ArrayList<Message>();
-		
+
 		for (User user : allUsers) {
 			if (user.getUsername().equals(username)) {
 				for (Message message : user.getReceivedMessages()) {
@@ -160,10 +195,10 @@ public class MessagingController {
 	}
 
 	@GetMapping("/checkMessagesSent/{username}")
-	ArrayList<Message> checkMessagesSent(@PathVariable String username) {
+	public ArrayList<Message> checkMessagesSent(@PathVariable String username) {
 		System.out.println("Retreiving SENT messages...");
 		ArrayList<Message> messageList = new ArrayList<Message>();
-		
+
 		for (User user : allUsers) {
 			if (user.getUsername().equals(username)) {
 				for (Message message : user.getSentMessages()) {
@@ -174,42 +209,54 @@ public class MessagingController {
 		return messageList;
 		// Returns all messages sent BY the user whose username matches the given one
 	}
-	
-	
-	
-	
-//	 FROM HERE:
-	
-//	 TODO
-//	@GetMapping
-//	String deleteMessage(...)
-//	deletes given message from sender + recipient
-//	
-	
-	
-	@GetMapping("/signIn/{username}/{password}")
-	String signIn(@PathVariable String username, @PathVariable String password) {
 
-		StringBuilder uniqueKey = new StringBuilder();
+//	TO DO - Is returnAllMessage redundant?
+//	Make the path var in checkMessagesSent/Received optional and just return everything if no var given?
+// Or is that a security hazard? If I forget to append the user
 
-		// Will send off username and password
-		// If that matches an account, it returns that user's unique key
-		// That unique key is remembered and used to validate messages, etc
+	@GetMapping("/returnAllMessages")
+	public ArrayList<Message> returnAllMessages() {
+		System.out.println("Returning all messages...");
 
-		// user.uniqueKey.set(uniqueKey);
-		return uniqueKey.toString();
+		ArrayList<Message> allMessages = new ArrayList<Message>();
+
+		for (User user : allUsers) {
+			for (Message message : user.getReceivedMessages()) {
+				if (!allMessages.contains(message)) {
+					allMessages.add(message);
+				}
+			}
+		}
+		return allMessages;
 
 	}
 
-	@PostMapping("/signUp/{username}/{password}")
-	String signUp(@PathVariable String username, @PathVariable String password) {
+	@GetMapping("/deleteMessage/{senderUsername}/{recipientUsername}/{messageReference}")
+	public String deleteMessage(@PathVariable String senderUsername, @PathVariable String recipientUsername,
+			@PathVariable int messageReference) {
 
-		// IF username is free, and IF password is at least 7 chars, makes an account
-		// Possible return Strings: account made, username taken, password too short
+		for (User user : allUsers) {
+			for (Message message : user.getReceivedMessages()) {
+				if (message.getUserMessageCount() == messageReference) {
+					user.getReceivedMessages().remove(message);
+					User sender = findByUsername(message.getSenderUsername());
+					sender.getSentMessages().remove(message);
+					message = null;
+					return "Message deleted";
+				}
+			}
+		}
+		return "Message not found. Nothing deleted";
+	}
 
-		StringBuilder returnedResult = new StringBuilder();
-		return returnedResult.toString();
-
+	@GetMapping("/signIn/{username}/{password}")
+	public String signIn(@PathVariable String username, @PathVariable String password) {
+		for (User user : allUsers) {
+			if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
+				return user.getUniqueKey().toString();
+			}
+		}
+		return "No user found matching that username and password combination";
 	}
 
 }

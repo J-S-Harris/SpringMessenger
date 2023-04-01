@@ -3,8 +3,6 @@ package com.messengerProject.SpringMessenger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.messengerProject.SpringMessenger.Controllers.MessagingController;
-
 @SpringBootApplication
 public class SpringMessengerApplication {
 
