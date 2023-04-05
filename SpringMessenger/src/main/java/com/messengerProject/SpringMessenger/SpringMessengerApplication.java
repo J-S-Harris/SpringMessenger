@@ -8,8 +8,6 @@ public class SpringMessengerApplication {
 
 	public static void main(String[] args) {
 		
-//		MessagingController controller = new MessagingController();
-		
 		SpringApplication.run(SpringMessengerApplication.class, args);
 	}
 

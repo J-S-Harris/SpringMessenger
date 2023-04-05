@@ -2,6 +2,7 @@ package com.messengerProject.SpringMessenger.Controllers;
 
 import java.util.ArrayList;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,11 +10,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.messengerProject.SpringMessenger.Models.Message;
 import com.messengerProject.SpringMessenger.Models.User;
 
+@CrossOrigin
 @RestController
 public class MessagingController {
 
+	// Make permanent with JPA
 	int messageCount;
 
+	// TEST DATA - to insert once after JPA is integrated
 	ArrayList<User> allUsers;
 	User JackHarris;
 	User testUser;

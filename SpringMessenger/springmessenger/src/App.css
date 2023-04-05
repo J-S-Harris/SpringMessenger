@@ -1,38 +1,82 @@
-.App {
+:root {
+  --mainBackgroundColour: rgb(8,150,56);
+  --accentedForegroundColour: rgb(90,200,90);
+  --mainForegroundColour: rgb(8,113,56);
+  --intermediateBackgroundColour: rgb(70,150,70);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  background-color: var(--mainForegroundColour);
+  color: black;
+  font-size: 35px;
+  text-align: center;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+
+.configurePane * {
+  padding: 3px;
+  margin: auto;
+}
+
+.configurePaneBox {
+  display:flex;
+  flex-direction: column;
+}
+.configurePaneBox * {  
+  margin: 10px;
+}
+
+input {
+  margin: 3px;
+}
+
+.inputBox, .buttonBox {
+display:flex;
+flex-direction: column;
+margin: 0;
+width: 96%;
+margin-left: 2%;
+}
+
+.configurePane, .configurePane * {
+  background-color: var(--mainForegroundColour);
+  position: sticky;
+  top: 0;
+}
+
+.sendMessageBox {
+  background-color: var(--accentedForegroundColour);
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 5px;
+  border-radius: 8px;
+  width: 96%;
+  margin-left: 2%;
+}
+.sendMessageBox *, .retrieveMessagesBox * {
+  margin: 5px;
+  border-radius: 10px;
+}
+
+
+.OptionsPane {
+  border-bottom: 5px solid black;
+}
+
+.usernamePasswordBox {
+  display:flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.footer * {
+  background-color: var(--intermediateBackgroundColour);
+  color: darkgreen;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
