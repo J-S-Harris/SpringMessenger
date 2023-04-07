@@ -3,6 +3,8 @@ import { useState } from "react";
 import axios from "axios";
 import OptionsPane from "./OptionsPane";
 import MessagePane from "./MessagePane";
+import examplelogo from "../images/examplelogo.jpg";
+import Header from "./Header"
 
 // Pass these in as state vars
 let baseURL = 'http://localhost:8081'
@@ -20,13 +22,13 @@ export default function ConfigurePane() {
 
     const [returnedUserStringify, setReturnedUserStringify] = useState("");
     const [returnedUserJSON, setReturnedUserJSON] = useState("");
-    
+
     const [currentUserPassword, setCurrentUserPassword] = useState("");
     const [currentUserAdminPrivileges, setCurrentUserAdminPrivileges] = useState("");
-   
+
     const [currentUserReceivedMessages, setCurrentUserReceivedMessages] = useState("");
     const [currentUserSentMessages, setCurrentUserSentMessages] = useState("");
-   
+
     const [recipientUsername, setRecipientUsername] = useState("");
     const [messageBody, setMessageBody] = useState("")
     const [messageTitle, setMessageTitle] = useState("")
@@ -43,7 +45,7 @@ export default function ConfigurePane() {
     }
     const updateRecipientUsername = event => {
         setRecipientUsername(event.target.value)
-        console.log("RECIPIENT: "+recipientUsername)
+        console.log("RECIPIENT: " + recipientUsername)
     }
     const updateMessageTitle = event => {
         setMessageTitle(event.target.value)
@@ -56,142 +58,183 @@ export default function ConfigurePane() {
 
     // Just POC for API calls
     function sampleApiCall() {
-    axios.get(baseURL+testApi)
-        .then ((response) => {
-            setTestApiOutput(response.data)
-        console.log(testApiOutput)
-    })}
+        axios.get(baseURL + testApi)
+            .then((response) => {
+                setTestApiOutput(response.data)
+                console.log(testApiOutput)
+            })
+    }
 
     function findUserByUsername(username) {
 
-        let userNameLookupUrl = baseURL+usernameLookupRoot+username;
+        let userNameLookupUrl = baseURL + usernameLookupRoot + username;
 
         axios.get(userNameLookupUrl)
             .then((response) => {
-                setReturnedUserStringify(JSON.stringify(response.data))   
+                setReturnedUserStringify(JSON.stringify(response.data))
                 setReturnedUserJSON(JSON.parse(returnedUserStringify));
-                
+
                 setCurrentUserUsername(returnedUserJSON.username)
                 setCurrentUserPassword(returnedUserJSON.password)
                 setCurrentUserUniqueKey(returnedUserJSON.uniqueKey)
                 setCurrentUserAdminPrivileges(returnedUserJSON.adminPrivileges)
                 setCurrentUserReceivedMessages(returnedUserJSON.receivedMessages)
                 setCurrentUserSentMessages(returnedUserJSON.sentMessages)
-                
+
             })
+    }
+
+    function DELETEtestMessageData() {
+        setCurrentUserReceivedMessages("TEST");
+    }
+
+    function automaticRefreshMessages() {
+        // Implement this
+        // Refresh stored sent/received messages every 5 seconds.
     }
 
     function sendMessage() {
 
-        let sendMessageURL = baseURL+sendMessageRoot
-            +currentUserUsername+'/'
-            +recipientUsername+'/'
-            +messageTitle+'/'
-            +messageBody
+        let sendMessageURL = baseURL + sendMessageRoot
+            + currentUserUsername + '/'
+            + recipientUsername + '/'
+            + messageTitle + '/'
+            + messageBody
 
-        console.log("USERNAME: "+currentUserUsername+"<---")
-        console.log("RECIPIENT: "+recipientUsername+" <---")
-        console.log("MESSAGE URL: "+sendMessageURL)
+        console.log("USERNAME: " + currentUserUsername + "<---")
+        console.log("RECIPIENT: " + recipientUsername + " <---")
+        console.log("MESSAGE URL: " + sendMessageURL)
 
         axios.get(sendMessageURL)
             .then((response) => {
 
                 let messageSendResponse = response;
                 let messageSendResponseData = JSON.parse(JSON.stringify(messageSendResponse)).data;
-                
+
                 if (messageSendResponseData === "Message sent!") {
                     alert(messageSendResponseData)
                 } else {
                     alert("Message failed to send :(")
                 }
-                
+
                 // TO DO: How make recipient, title, and body fields empty
                 // after sending a message successfully?
 
-        })
+            })
     }
-    
+
+    function signUp() {
+        alert("Not implemented yet")
+    }
+
     function signIn() {
-        
-        let signInURL = baseURL+signInRoot+usernameText+'/'+passwordText
-        console.log(signInURL)      
+
+        let signInURL = baseURL + signInRoot + usernameText + '/' + passwordText
+        console.log(signInURL)
 
         axios.get(signInURL)
-        .then((response) => {
-                
-                console.log("RESPONSE.DATA: "+response.data)
-                
+            .then((response) => {
+
+                console.log("RESPONSE.DATA: " + response.data)
+
                 // TO DO: This is bad, rewrite
                 // If the returned value is a number,
                 // set username to display as signed-in user
                 if (response.data >= 0 && response.data <= 1) {
                     setCurrentUserUniqueKey(response.data);
                     setCurrentUserUsername(usernameText);
-                    findUserByUsername(currentUserUsername);                    
-                    console.log("UNIQUE KEY: "+currentUserUniqueKey)
+                    findUserByUsername(currentUserUsername);
+                    console.log("UNIQUE KEY: " + currentUserUniqueKey)
                 } else {
-                    setCurrentUserUniqueKey("")
-                    setCurrentUserUsername("")
+                    alert("No user found matching those details")
                 }
             })
     }
 
-        function signOut() {
-            setCurrentUserUniqueKey("");
-            setCurrentUserUsername("");
-            setCurrentUserPassword("");
-            setCurrentUserAdminPrivileges("");
-            setCurrentUserReceivedMessages("");
-            setCurrentUserSentMessages("");
-        }
+    function signOut() {
+        setCurrentUserUniqueKey("");
+        setCurrentUserUsername("");
+        setCurrentUserPassword("");
+        setCurrentUserAdminPrivileges("");
+        setCurrentUserReceivedMessages("");
+        setCurrentUserSentMessages("");
+    }
 
-    return(
+    return (
+
+
+
         <div className="configurePane">
 
-            <div className="configurePaneBox">
+            <Header username={currentUserUsername} signOut={signOut} />
 
-                <div className="usernamePasswordBox">
-                <img alt="IMG HERE"></img>
-                <h1>{currentUserUsername}</h1>
+            {currentUserUsername == '' &&
+                <div className="configurePaneBox">
+
+                    <div className="usernamePasswordBox">
+                        <img alt="Logo" src={examplelogo}></img>
+
+
+
+                        <div className="inputBox">
+                            <input onChange={updateUsernameText} placeholder="Username" />
+                            <input onChange={updatePasswordText} placeholder="Password" />
+                        </div>
+
+                        <div className="buttonBox">
+                            <button onClick={signIn} >Sign in</button>
+                            <button onClick={signUp}>Sign up</button>
+
+                        </div>
+
+                    </div>
+
                 </div>
-                
-                <div className="inputBox">
-                <input onChange={updateUsernameText} placeholder="Username" />
-                <input onChange={updatePasswordText} placeholder="Password" />
+            }
+
+            {currentUserUsername !== "" &&
+                <div>
+
+                    <div>
+
+                        <div className="sendMessageBox">
+                            <div className="flexHorizontal">
+                                <input onChange={updateRecipientUsername} placeholder="Recipient" />
+                                <input onChange={updateMessageTitle} placeholder="Title" />
+                            </div>
+                            <input onChange={updateMessageBody} placeholder="body" />
+                            <button onClick={sendMessage}>Send Message</button>
+                        </div>
+
+                        <div className="retrieveMessagesBox">
+                            <div className="flexHorizontal">
+                                {/* TO DO: onClick={method: returns all RECEIVED messages. Clears SENT messages} */}
+                                <input placeholder="Sender"></input>
+                                <button onClick={DELETEtestMessageData}>Retrieve received messages</button>
+                            </div>
+                            
+                            <hr />
+
+                            <div className="flexHorizontal">
+                                {/* TO DO: onClick={method: returns all RECEIVED messages. Clears SENT messages} */}
+                                <input placeholder="Recipient"></input>
+                                <button onClick={DELETEtestMessageData}>Retrieve sent messages</button>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+
+
+                    <OptionsPane />
+
+                    <MessagePane received={currentUserReceivedMessages}
+                        sent={currentUserSentMessages} testApiOutput={testApiOutput} />
+
                 </div>
-
-                <div className="buttonBox">
-                <button onClick={signIn} >Sign in</button>
-                <button>Sign up</button>
-                <button onClick={signOut}>Sign out</button>
-                </div>
-    
-                <div className="sendMessageBox">
-                <input onChange={updateRecipientUsername} placeholder="Recipient" />
-                <input onChange={updateMessageTitle} placeholder="Title" />
-                <input onChange={updateMessageBody} placeholder="body" />
-                <button onClick={sendMessage}>Send Message</button>
-                </div>
-
-                <div className="retrieveMessagesBox">
-                {/* TO DO: What criteria can I add to filter messages
-                    Or do I even want to filter them?*/}
-                <input placeholder="Criteria: sender username"></input>
-                
-                {/* TO DO: onClick={method that returns all messages according to criteria} */}
-                <button>Retrieve messages</button>
-                </div>
-
-        <button onClick={sampleApiCall}>TEST API</button>
-            </div>
-
-        
-
-
-        <OptionsPane />
-
-        <MessagePane currentUserUsername={currentUserUsername} testApiOutput={testApiOutput}/>
-
+            }
 
         </div>
     )

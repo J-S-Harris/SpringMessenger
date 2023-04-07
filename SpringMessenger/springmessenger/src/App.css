@@ -17,7 +17,6 @@
 
 
 .configurePane * {
-  padding: 3px;
   margin: auto;
 }
 
@@ -33,12 +32,16 @@ input {
   margin: 3px;
 }
 
+
 .inputBox, .buttonBox {
 display:flex;
 flex-direction: column;
 margin: 0;
 width: 96%;
 margin-left: 2%;
+}
+.inputBox *:hover, .buttonBox *:hover {
+  transform: scale(1.02);
 }
 
 .configurePane, .configurePane * {
@@ -57,9 +60,23 @@ margin-left: 2%;
   width: 96%;
   margin-left: 2%;
 }
+
+.sendMessageBox .flexHorizontal {
+  justify-content: space-around;
+}
+
+.retrieveMessagesBox {
+  display: flex;
+}
 .sendMessageBox *, .retrieveMessagesBox * {
   margin: 5px;
   border-radius: 10px;
+  padding: 5px;
+}
+
+hr {
+  border: 3px solid black;
+  background-color: black;
 }
 
 
@@ -69,14 +86,39 @@ margin-left: 2%;
 
 .usernamePasswordBox {
   display:flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: space-around;
+}
+
+.header {
+  margin-bottom: 20px;
+}
+
+.header * {
+  background-color: var(--intermediateBackgroundColour);
+  font-size: 25px;
+  
 }
 
 .footer * {
   background-color: var(--intermediateBackgroundColour);
   color: darkgreen;
   text-align: center;
+  position: sticky;
+  bottom: 0;
+}
+
+.flexHorizontal {
+  display:flex;
+  flex-direction: row;
+}
+
+.messageOutputBox {
+  border: 5px solid black;
+  margin: 20px;
+}
+.messageOutputBox * {
+  padding: 15px;
 }
 

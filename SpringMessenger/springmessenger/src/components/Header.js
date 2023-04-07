@@ -1,11 +1,19 @@
 import React from "react";
 
-export default function Header() {
+export default function Header(props) {
 
-return(
-    <div className="header">
+    return (
+        <div className="header">
 
-    </div>
-)
+            {props.username !== '' &&
+                <div className="flexHorizontal">
+                    <h2>Signed in user: {props.username}</h2>
+                    <button onClick={props.signOut}>Sign out</button>
+                </div>
+            }
+
+
+        </div>
+    )
 
 }

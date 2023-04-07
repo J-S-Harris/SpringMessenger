@@ -17,14 +17,13 @@ export default function App() {
  
      return(
          <div>
-
-            <Header />
+            
 
         {/* TO DO: Extract the logic from ConfigurePane and put in here?
         And pass it the relevant values?             */}
             <ConfigurePane />
 
-            <Footer />
+            {/* <Footer /> */}
  
          </div>
      )
