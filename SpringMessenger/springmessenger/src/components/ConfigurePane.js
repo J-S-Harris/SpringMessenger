@@ -5,6 +5,8 @@ import OptionsPane from "./OptionsPane";
 import MessagePane from "./MessagePane";
 import examplelogo from "../images/examplelogo.jpg";
 import Header from "./Header"
+import AllUsersOutput from "./AllUsersOutput";
+import SendCheckMessagesBox from "./SendCheckMessagesBox";
 
 // Pass these in as state vars
 let baseURL = 'http://localhost:8081'
@@ -12,6 +14,13 @@ let testApi = '/'
 let signInRoot = '/signIn/'
 let usernameLookupRoot = '/findByUsername/'
 let sendMessageRoot = '/sendMessage/'
+let retrieveListRoot = "/returnAllUsers"
+let retrieveAllMessagesReceivedRoot = "/checkMessagesReceived"
+let retrieveAllMessagesSentRoot = "/checkMessagesSent"
+    // + {currentUserUsername}
+
+let userOutputList;
+
 
 export default function ConfigurePane() {
 
@@ -35,6 +44,12 @@ export default function ConfigurePane() {
 
     const [testApiOutput, setTestApiOutput] = useState("")
 
+    const [allUsersList, setAllUsersList] = useState("")
+
+    const [checkSendMessageBox, setCheckSendMessageBox] = useState('false')
+    const [sendMessageBoxVisible, setSendMessageBoxVisible] = useState("false")
+    const [checkMessageBoxVisible, setCheckMessageBoxVisible] = useState("false")
+
 
     // For tracking data entered in text boxes
     const updateUsernameText = event => {
@@ -56,12 +71,61 @@ export default function ConfigurePane() {
         console.log(messageBody)
     }
 
+
+
+    // VARIOUS FUNCTIONS:
+
     // Just POC for API calls
     function sampleApiCall() {
         axios.get(baseURL + testApi)
             .then((response) => {
                 setTestApiOutput(response.data)
                 console.log(testApiOutput)
+            })
+    }
+
+    function closeAllUsersList() {
+        setAllUsersList("")
+    }
+
+    function setSendMessageToTrue() {
+        setSendMessageBoxVisible("true")
+    }
+    function setSendMessageToFalse() {
+        setSendMessageBoxVisible("false")
+    }
+
+    function setCheckMessageBoxVisibleToTrue() {
+        setCheckMessageBoxVisible("true")
+    }
+    function setCheckMessageBoxVisibleToFalse() {
+        setCheckMessageBoxVisible("false")
+        setCurrentUserReceivedMessages("")
+    }
+
+    function setCurrentUserReceivedMessagesToFalse() {
+        setCurrentUserReceivedMessages('')
+    }
+
+    // API FUNCTIONS
+
+    function retrieveListOfAllUsers() {
+        let allUsers = baseURL + retrieveListRoot;
+        axios.get(allUsers)
+            .then((response) => {
+
+                setAllUsersList("")
+                userOutputList = ""
+                let userResponse = response;
+
+                for (let i = 0; i < userResponse.data.length; i++) {
+                    // for (let i = 0; userResponse.length-1; i++) {
+                    console.log(userResponse.data[i].username)
+                    userOutputList += userResponse.data[i].username + " "
+                }
+
+                setAllUsersList(userOutputList)
+                console.log(allUsersList)
             })
     }
 
@@ -88,6 +152,24 @@ export default function ConfigurePane() {
         setCurrentUserReceivedMessages("TEST");
     }
 
+    function retrieveAllReceivedMessages() {
+
+   let messageURL = baseURL + retrieveAllMessagesReceivedRoot +'/'+ currentUserUsername
+    console.log("USERNAME received: "+currentUserUsername)
+    axios.get(messageURL)
+        .then((response) => {
+            console.log(response)
+    })}
+
+    function retrieveAllSentMessages() {
+
+        let messageURL = baseURL + retrieveAllMessagesSentRoot +'/'+ currentUserUsername
+         console.log("USERNAME sent: "+currentUserUsername)
+         axios.get(messageURL)
+             .then((response) => {
+                 console.log(response)
+         })}
+
     function automaticRefreshMessages() {
         // Implement this
         // Refresh stored sent/received messages every 5 seconds.
@@ -113,6 +195,9 @@ export default function ConfigurePane() {
 
                 if (messageSendResponseData === "Message sent!") {
                     alert(messageSendResponseData)
+                    setMessageBody("");
+                    setSendMessageBoxVisible('false')
+                    
                 } else {
                     alert("Message failed to send :(")
                 }
@@ -128,6 +213,9 @@ export default function ConfigurePane() {
     }
 
     function signIn() {
+
+        setCheckMessageBoxVisibleToFalse();
+        setSendMessageToFalse();
 
         let signInURL = baseURL + signInRoot + usernameText + '/' + passwordText
         console.log(signInURL)
@@ -145,6 +233,7 @@ export default function ConfigurePane() {
                     setCurrentUserUsername(usernameText);
                     findUserByUsername(currentUserUsername);
                     console.log("UNIQUE KEY: " + currentUserUniqueKey)
+                    setCheckSendMessageBox('true');
                 } else {
                     alert("No user found matching those details")
                 }
@@ -158,6 +247,10 @@ export default function ConfigurePane() {
         setCurrentUserAdminPrivileges("");
         setCurrentUserReceivedMessages("");
         setCurrentUserSentMessages("");
+
+        setCheckSendMessageBox('false')
+        setCheckMessageBoxVisibleToFalse();
+        setSendMessageToFalse();
     }
 
     return (
@@ -166,15 +259,18 @@ export default function ConfigurePane() {
 
         <div className="configurePane">
 
-            <Header username={currentUserUsername} signOut={signOut} />
+            <Header closeAllUsersList={closeAllUsersList} allUsersList={allUsersList} username={currentUserUsername} signOut={signOut} sampleApiCall={sampleApiCall} retrieveListOfAllUsers={retrieveListOfAllUsers} />
 
-            {currentUserUsername == '' &&
+            {currentUserUsername !== '' && allUsersList !== '' &&
+                <AllUsersOutput allUsersList={allUsersList} />
+            }
+
+            {/*  For Signing in: */}
+            {currentUserUsername === '' &&
                 <div className="configurePaneBox">
 
                     <div className="usernamePasswordBox">
                         <img alt="Logo" src={examplelogo}></img>
-
-
 
                         <div className="inputBox">
                             <input onChange={updateUsernameText} placeholder="Username" />
@@ -186,42 +282,59 @@ export default function ConfigurePane() {
                             <button onClick={signUp}>Sign up</button>
 
                         </div>
-
                     </div>
-
                 </div>
             }
 
+            {/* Once signed in: */}
+
+            {checkSendMessageBox === 'true' && sendMessageBoxVisible === "false" && checkMessageBoxVisible === "false" &&
+
+                <SendCheckMessagesBox setCheckMessageBoxVisibleToTrue={setCheckMessageBoxVisibleToTrue}
+                    setSendMessageToTrue={setSendMessageToTrue} />
+
+
+            }
+
+
+
             {currentUserUsername !== "" &&
                 <div>
-
                     <div>
-
-                        <div className="sendMessageBox">
-                            <div className="flexHorizontal">
-                                <input onChange={updateRecipientUsername} placeholder="Recipient" />
-                                <input onChange={updateMessageTitle} placeholder="Title" />
+                        {sendMessageBoxVisible === 'true' &&
+                            <div>
+                                <div className="sendMessageBox">
+                                    <div className="flexHorizontal">
+                                        <input onChange={updateRecipientUsername} placeholder="Recipient" />
+                                        <input onChange={updateMessageTitle} placeholder="Title" />
+                                    </div>
+                                    <input onChange={updateMessageBody} placeholder="body" />
+                                    <button onClick={sendMessage}>Send Message</button>
+                                    <button onClick={setSendMessageToFalse}>Close</button>
+                                </div>
                             </div>
-                            <input onChange={updateMessageBody} placeholder="body" />
-                            <button onClick={sendMessage}>Send Message</button>
-                        </div>
+                        }
 
-                        <div className="retrieveMessagesBox">
-                            <div className="flexHorizontal">
-                                {/* TO DO: onClick={method: returns all RECEIVED messages. Clears SENT messages} */}
-                                <input placeholder="Sender"></input>
-                                <button onClick={DELETEtestMessageData}>Retrieve received messages</button>
+                        {checkMessageBoxVisible === 'true' &&
+
+                            <div className="retrieveMessagesBox">
+                                <div className="flexHorizontal">
+                                    {/* TO DO: onClick={method: display RECEIVED messages} */}
+                                    <input placeholder="Sender"></input>
+                                    <button onClick={retrieveAllReceivedMessages}>Retrieve received messages</button>
+                                </div>
+
+                                
+
+                                <div className="flexHorizontal">
+                                    {/* TO DO: onClick={method: display SENT messages} */}
+                                    <input placeholder="Recipient"></input>
+                                    <button onClick={retrieveAllSentMessages}>Retrieve sent messages</button>
+                                </div>
+                                <button onClick={setCheckMessageBoxVisibleToFalse}>Close</button>
+                                <button onClick={setCurrentUserReceivedMessagesToFalse}>Clear messages</button>
                             </div>
-                            
-                            <hr />
-
-                            <div className="flexHorizontal">
-                                {/* TO DO: onClick={method: returns all RECEIVED messages. Clears SENT messages} */}
-                                <input placeholder="Recipient"></input>
-                                <button onClick={DELETEtestMessageData}>Retrieve sent messages</button>
-                            </div>
-                        </div>
-
+                        }
 
                     </div>
 
@@ -230,13 +343,22 @@ export default function ConfigurePane() {
 
                     <OptionsPane />
 
-                    <MessagePane received={currentUserReceivedMessages}
-                        sent={currentUserSentMessages} testApiOutput={testApiOutput} />
+                    {/* Why is this not displaying messages?
+                    Data is being returned from the API, but nothing is appearing in-app */}
+                    {currentUserReceivedMessages !== '' && checkMessageBoxVisible == 'true' &&
+                    <MessagePane
+                    currentUserReceivedMessages={currentUserReceivedMessages}
+                    currentUserSentMessages={currentUserSentMessages}
+                    testApiOutput={testApiOutput}
+                    />
+                    }
+                    
 
                 </div>
+
             }
 
-        </div>
+        </div >
     )
 
 }

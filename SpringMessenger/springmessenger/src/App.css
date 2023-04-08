@@ -51,12 +51,11 @@ margin-left: 2%;
 }
 
 .sendMessageBox {
-  background-color: var(--accentedForegroundColour);
+  background-color: var(--mainForegroundColour);
   display: flex;
   flex-direction: column;
   margin: 0;
   padding: 5px;
-  border-radius: 8px;
   width: 96%;
   margin-left: 2%;
 }
@@ -67,11 +66,13 @@ margin-left: 2%;
 
 .retrieveMessagesBox {
   display: flex;
+  flex-direction: column;
+  
 }
 .sendMessageBox *, .retrieveMessagesBox * {
-  margin: 5px;
-  border-radius: 10px;
-  padding: 5px;
+  justify-content: center;
+  margin: 15px;
+  padding: 30px;
 }
 
 hr {
@@ -79,10 +80,6 @@ hr {
   background-color: black;
 }
 
-
-.OptionsPane {
-  border-bottom: 5px solid black;
-}
 
 .usernamePasswordBox {
   display:flex;
@@ -93,12 +90,32 @@ hr {
 
 .header {
   margin-bottom: 20px;
+  position: sticky;
+  top: 0;
 }
 
 .header * {
   background-color: var(--intermediateBackgroundColour);
   font-size: 25px;
-  
+  position: sticky;
+  top: 0;
+}
+
+.allUsersBox {
+  border-top: 3px solid black;
+  border-bottom: 3px solid black;
+  position:static;
+}
+.allUsersBox * {
+  margin: 10px;
+}
+
+.SendCheckMessagesBox * {
+
+  margin: 5%;
+  padding: 40px;
+  font-size: 40px;
+
 }
 
 .footer * {
@@ -114,8 +131,16 @@ hr {
   flex-direction: row;
 }
 
+.flexVertical {
+  display:flex;
+  flex-direction: column;
+}
+.flexVertical * {
+  margin: 3px;
+}
+
 .messageOutputBox {
-  border: 5px solid black;
+  border-top: 5px solid black;
   margin: 20px;
 }
 .messageOutputBox * {
