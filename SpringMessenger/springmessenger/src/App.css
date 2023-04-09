@@ -101,6 +101,19 @@ hr {
   top: 0;
 }
 
+button {
+  border: 2px solid black;
+  background-color: var(--accentedForegroundColour);
+}
+
+.header button {
+  padding: 5px;
+  margin: 4px;
+  margin-top: 5px;
+  margin-right: 10px;
+  border: 4px solid black;
+}
+
 .allUsersBox {
   border-top: 3px solid black;
   border-bottom: 3px solid black;

@@ -6,17 +6,16 @@ export default function MessagePane(props) {
     return (
         <div>
             
-           {(props.currentUserReceivedMessages !== '' || props.currentUserSentMessages !== '') &&
+    
            <div>
-                <MessageDisplay
-                currentUserReceivedMessages={props.currentUserReceivedMessages}
-                currentUserSentMessages={props.currentUserSentMessages.data.recipientUserName}
-                currentUserUsername={props.currentUserUsername}
-                testApiOutput={props.testApiOutput}
-                />
+           <MessageDisplay
+                    currentUserReceivedMessages={props.currentUserReceivedMessages}
+                    currentUserSentMessages={props.currentUserSentMessages}
+                    testApiOutput={props.testApiOutput}
+                    />
 
                 </div>
-            }
+            
     
 
 

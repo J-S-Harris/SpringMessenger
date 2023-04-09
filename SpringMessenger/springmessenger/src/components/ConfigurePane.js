@@ -7,6 +7,7 @@ import examplelogo from "../images/examplelogo.jpg";
 import Header from "./Header"
 import AllUsersOutput from "./AllUsersOutput";
 import SendCheckMessagesBox from "./SendCheckMessagesBox";
+import MessageDisplay from "./MessageDisplay";
 
 // Pass these in as state vars
 let baseURL = 'http://localhost:8081'
@@ -17,7 +18,7 @@ let sendMessageRoot = '/sendMessage/'
 let retrieveListRoot = "/returnAllUsers"
 let retrieveAllMessagesReceivedRoot = "/checkMessagesReceived"
 let retrieveAllMessagesSentRoot = "/checkMessagesSent"
-    // + {currentUserUsername}
+// + {currentUserUsername}
 
 let userOutputList;
 
@@ -49,7 +50,7 @@ export default function ConfigurePane() {
     const [checkSendMessageBox, setCheckSendMessageBox] = useState('false')
     const [sendMessageBoxVisible, setSendMessageBoxVisible] = useState("false")
     const [checkMessageBoxVisible, setCheckMessageBoxVisible] = useState("false")
-
+    const [checkMessageOutputVisible, setCheckMessageOutputVisible] = useState("false")
 
     // For tracking data entered in text boxes
     const updateUsernameText = event => {
@@ -101,10 +102,19 @@ export default function ConfigurePane() {
     function setCheckMessageBoxVisibleToFalse() {
         setCheckMessageBoxVisible("false")
         setCurrentUserReceivedMessages("")
+        setCheckMessageOutputVisibleToFalse();
     }
+    function setCheckMessageOutputVisibleToTrue() {
+        setCheckMessageOutputVisible("true")
+    }
+    function setCheckMessageOutputVisibleToFalse() {
+        setCheckMessageOutputVisible("false")
+    }
+
 
     function setCurrentUserReceivedMessagesToFalse() {
         setCurrentUserReceivedMessages('')
+        setCheckMessageOutputVisibleToFalse();
     }
 
     // API FUNCTIONS
@@ -153,22 +163,26 @@ export default function ConfigurePane() {
     }
 
     function retrieveAllReceivedMessages() {
-
-   let messageURL = baseURL + retrieveAllMessagesReceivedRoot +'/'+ currentUserUsername
-    console.log("USERNAME received: "+currentUserUsername)
-    axios.get(messageURL)
-        .then((response) => {
-            console.log(response)
-    })}
+        let messageURL = baseURL + retrieveAllMessagesReceivedRoot + '/' + currentUserUsername
+        console.log("USERNAME received: " + currentUserUsername)
+        axios.get(messageURL)
+            .then((response) => {
+                console.log(response)
+            })
+        setCheckMessageOutputVisibleToTrue();
+    }
 
     function retrieveAllSentMessages() {
 
-        let messageURL = baseURL + retrieveAllMessagesSentRoot +'/'+ currentUserUsername
-         console.log("USERNAME sent: "+currentUserUsername)
-         axios.get(messageURL)
-             .then((response) => {
-                 console.log(response)
-         })}
+        let messageURL = baseURL + retrieveAllMessagesSentRoot + '/' + currentUserUsername
+        console.log("USERNAME sent: " + currentUserUsername)
+        axios.get(messageURL)
+            .then((response) => {
+                console.log(response)
+            })
+
+            setCheckMessageOutputVisibleToTrue();
+    }
 
     function automaticRefreshMessages() {
         // Implement this
@@ -197,7 +211,7 @@ export default function ConfigurePane() {
                     alert(messageSendResponseData)
                     setMessageBody("");
                     setSendMessageBoxVisible('false')
-                    
+
                 } else {
                     alert("Message failed to send :(")
                 }
@@ -251,6 +265,8 @@ export default function ConfigurePane() {
         setCheckSendMessageBox('false')
         setCheckMessageBoxVisibleToFalse();
         setSendMessageToFalse();
+
+        closeAllUsersList()
     }
 
     return (
@@ -274,7 +290,7 @@ export default function ConfigurePane() {
 
                         <div className="inputBox">
                             <input onChange={updateUsernameText} placeholder="Username" />
-                            <input onChange={updatePasswordText} placeholder="Password" />
+                            <input onChange={updatePasswordText} placeholder="Password" type="password" />
                         </div>
 
                         <div className="buttonBox">
@@ -324,7 +340,7 @@ export default function ConfigurePane() {
                                     <button onClick={retrieveAllReceivedMessages}>Retrieve received messages</button>
                                 </div>
 
-                                
+
 
                                 <div className="flexHorizontal">
                                     {/* TO DO: onClick={method: display SENT messages} */}
@@ -343,16 +359,22 @@ export default function ConfigurePane() {
 
                     <OptionsPane />
 
-                    {/* Why is this not displaying messages?
-                    Data is being returned from the API, but nothing is appearing in-app */}
-                    {currentUserReceivedMessages !== '' && checkMessageBoxVisible == 'true' &&
-                    <MessagePane
+
+
+
+                    {/* <MessagePane
                     currentUserReceivedMessages={currentUserReceivedMessages}
                     currentUserSentMessages={currentUserSentMessages}
                     testApiOutput={testApiOutput}
-                    />
+                    /> */}
+
+                    {checkMessageOutputVisible == 'true' &&
+                        <MessageDisplay currentUserUsername={currentUserUsername}
+                            currentUserReceivedMessages={currentUserReceivedMessages}
+                            currentUserSentMessages={currentUserSentMessages}
+                        />
                     }
-                    
+
 
                 </div>
 
