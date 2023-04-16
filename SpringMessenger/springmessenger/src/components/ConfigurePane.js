@@ -2,7 +2,6 @@ import React from "react";
 import { useState } from "react";
 import axios from "axios";
 import OptionsPane from "./OptionsPane";
-import MessagePane from "./MessagePane";
 import examplelogo from "../images/examplelogo.jpg";
 import Header from "./Header"
 import AllUsersOutput from "./AllUsersOutput";
@@ -15,12 +14,17 @@ let testApi = '/'
 let signInRoot = '/signIn/'
 let usernameLookupRoot = '/findByUsername/'
 let sendMessageRoot = '/sendMessage/'
+// + '/' + ? + ? + ? + ?
 let retrieveListRoot = "/returnAllUsers"
 let retrieveAllMessagesReceivedRoot = "/checkMessagesReceived"
 let retrieveAllMessagesSentRoot = "/checkMessagesSent"
-// + {currentUserUsername}
+// + '/' + {currentUserUsername}
+let signUpRoot = "/createUser"
+// + '/' + {usernameTest} + '/' + {passwordText}
 
+// For information returned at various points
 let userOutputList;
+let rawResponse
 
 
 export default function ConfigurePane() {
@@ -51,6 +55,7 @@ export default function ConfigurePane() {
     const [sendMessageBoxVisible, setSendMessageBoxVisible] = useState("false")
     const [checkMessageBoxVisible, setCheckMessageBoxVisible] = useState("false")
     const [checkMessageOutputVisible, setCheckMessageOutputVisible] = useState("false")
+    const [senderRecipientBoxesVisible, setSenderRecipientBoxesVisible] = useState("true")
 
     // For tracking data entered in text boxes
     const updateUsernameText = event => {
@@ -81,6 +86,7 @@ export default function ConfigurePane() {
         axios.get(baseURL + testApi)
             .then((response) => {
                 setTestApiOutput(response.data)
+                alert(testApiOutput)
                 console.log(testApiOutput)
             })
     }
@@ -98,6 +104,7 @@ export default function ConfigurePane() {
 
     function setCheckMessageBoxVisibleToTrue() {
         setCheckMessageBoxVisible("true")
+        setSenderRecipientBoxesVisible('true')
     }
     function setCheckMessageBoxVisibleToFalse() {
         setCheckMessageBoxVisible("false")
@@ -115,6 +122,7 @@ export default function ConfigurePane() {
     function setCurrentUserReceivedMessagesToFalse() {
         setCurrentUserReceivedMessages('')
         setCheckMessageOutputVisibleToFalse();
+        setSenderRecipientBoxesVisible('true')
     }
 
     // API FUNCTIONS
@@ -129,9 +137,8 @@ export default function ConfigurePane() {
                 let userResponse = response;
 
                 for (let i = 0; i < userResponse.data.length; i++) {
-                    // for (let i = 0; userResponse.length-1; i++) {
                     console.log(userResponse.data[i].username)
-                    userOutputList += userResponse.data[i].username + " "
+                    userOutputList += userResponse.data[i].username + "   |   "
                 }
 
                 setAllUsersList(userOutputList)
@@ -164,24 +171,26 @@ export default function ConfigurePane() {
 
     function retrieveAllReceivedMessages() {
         let messageURL = baseURL + retrieveAllMessagesReceivedRoot + '/' + currentUserUsername
-        console.log("USERNAME received: " + currentUserUsername)
+
         axios.get(messageURL)
             .then((response) => {
-                console.log(response)
+
+                rawResponse = response.data;
+                setCheckMessageOutputVisibleToTrue();
+                setSenderRecipientBoxesVisible('false')
             })
-        setCheckMessageOutputVisibleToTrue();
     }
 
     function retrieveAllSentMessages() {
 
         let messageURL = baseURL + retrieveAllMessagesSentRoot + '/' + currentUserUsername
-        console.log("USERNAME sent: " + currentUserUsername)
         axios.get(messageURL)
             .then((response) => {
-                console.log(response)
-            })
 
-            setCheckMessageOutputVisibleToTrue();
+                rawResponse = response.data;
+                setCheckMessageOutputVisibleToTrue();
+                setSenderRecipientBoxesVisible('false')
+            })
     }
 
     function automaticRefreshMessages() {
@@ -223,7 +232,32 @@ export default function ConfigurePane() {
     }
 
     function signUp() {
-        alert("Not implemented yet")
+        let signUpURL = baseURL + signUpRoot + '/' + usernameText + '/' + passwordText
+        console.log(signUpURL)
+
+        if (usernameText.length > 5 && passwordText.length > 5) {
+
+            axios.get(signUpURL)
+                .then((response) => {
+                    let outputString = response.data
+                    let splitOutputString = outputString.split(":")[0];
+                    console.log(outputString)
+                    console.log(splitOutputString)
+
+                    if (splitOutputString === 'New user created') {
+                        alert("User created. Please sign in with the username and password given.")
+                    }
+
+                    if (splitOutputString === 'Username taken, user not added') {
+                        alert("Username taken. Please try another.")
+                    }
+
+                })
+
+        } else {
+            alert("Username and password must be at least 6 characters")
+        }
+
     }
 
     function signIn() {
@@ -240,8 +274,6 @@ export default function ConfigurePane() {
                 console.log("RESPONSE.DATA: " + response.data)
 
                 // TO DO: This is bad, rewrite
-                // If the returned value is a number,
-                // set username to display as signed-in user
                 if (response.data >= 0 && response.data <= 1) {
                     setCurrentUserUniqueKey(response.data);
                     setCurrentUserUsername(usernameText);
@@ -267,6 +299,8 @@ export default function ConfigurePane() {
         setSendMessageToFalse();
 
         closeAllUsersList()
+
+        rawResponse = ''
     }
 
     return (
@@ -334,21 +368,25 @@ export default function ConfigurePane() {
                         {checkMessageBoxVisible === 'true' &&
 
                             <div className="retrieveMessagesBox">
-                                <div className="flexHorizontal">
-                                    {/* TO DO: onClick={method: display RECEIVED messages} */}
-                                    <input placeholder="Sender"></input>
-                                    <button onClick={retrieveAllReceivedMessages}>Retrieve received messages</button>
-                                </div>
 
+                                {senderRecipientBoxesVisible === 'true' &&
+                                    <div className="flexHorizontal">
 
+                                        <button onClick={retrieveAllReceivedMessages}>Retrieve received messages</button>
+                                    </div>
+                                }
 
-                                <div className="flexHorizontal">
-                                    {/* TO DO: onClick={method: display SENT messages} */}
-                                    <input placeholder="Recipient"></input>
-                                    <button onClick={retrieveAllSentMessages}>Retrieve sent messages</button>
-                                </div>
+                                {senderRecipientBoxesVisible === 'true' &&
+                                    <div className="flexHorizontal">
+
+                                        <button onClick={retrieveAllSentMessages}>Retrieve sent messages</button>
+                                    </div>
+                                }
+
                                 <button onClick={setCheckMessageBoxVisibleToFalse}>Close</button>
+                            {checkMessageOutputVisible !== 'false' &&
                                 <button onClick={setCurrentUserReceivedMessagesToFalse}>Clear messages</button>
+                            }
                             </div>
                         }
 
@@ -368,10 +406,9 @@ export default function ConfigurePane() {
                     testApiOutput={testApiOutput}
                     /> */}
 
-                    {checkMessageOutputVisible == 'true' &&
+                    {checkMessageOutputVisible === 'true' &&
                         <MessageDisplay currentUserUsername={currentUserUsername}
-                            currentUserReceivedMessages={currentUserReceivedMessages}
-                            currentUserSentMessages={currentUserSentMessages}
+                            rawResponse={rawResponse}
                         />
                     }
 

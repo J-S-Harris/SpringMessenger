@@ -12,11 +12,11 @@ export default function Header(props) {
 
                     <div className="topRightButtons">
                         <button onClick={props.signOut}>Sign out</button>
-                        <button onClick={props.sampleApiCall}>Test API</button>
+                        <button onClick={props.sampleApiCall}>Check connection</button>
 
                         {/* Implement these: */}
                         <button onClick={props.retrieveListOfAllUsers}>All users</button>
-                        <button onClick={props.checkUserExists}>Search</button>
+                        {/* <button onClick={props.checkUserExists}>Search</button> */}
                     </div>
 
                 </div>

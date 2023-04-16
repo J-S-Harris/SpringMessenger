@@ -139,6 +139,51 @@ button {
   bottom: 0;
 }
 
+.senderReceiverBox {
+  border: 10px solid black;
+  display: flex;
+  flex-direction: row;
+  border-radius: 10px;
+  padding: 0;
+  margin: 0;
+}
+
+.toBox {
+  background-color: var(--intermediateBackgroundColour);
+  border-top-right-radius: 20px;
+  border-top-left-radius: 20px;
+  display: flex;
+}
+
+.fromBox {
+  background-color: var(--intermediateBackgroundColour);
+  border-bottom-right-radius: 20px;
+  border-bottom-left-radius: 20px;
+  display: flex;
+}
+
+.toBox *, .fromBox * {
+  padding: 0;
+  margin: 0;
+}
+
+.titleBodyBox {
+  width: 100%;
+}
+
+.title {
+  background-color: var(--intermediateBackgroundColour);
+  margin-bottom: 10px;
+  border-top-right-radius: 20px;
+  border-top-left-radius: 20px;
+}
+
+.body {
+  background-color: var(--intermediateBackgroundColour);
+  border-bottom-right-radius: 20px;
+  border-bottom-left-radius: 20px;
+}
+
 .flexHorizontal {
   display:flex;
   flex-direction: row;
